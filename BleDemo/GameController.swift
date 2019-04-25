@@ -12,6 +12,10 @@ class GameController: UIViewController {
 
     @IBOutlet weak var boardView: UIView!
     
+    @IBOutlet weak var handleBtn: UIButton!
+    
+    @IBOutlet weak var alertLbl: UILabel!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,7 +27,6 @@ class GameController: UIViewController {
         for str in arr {
             putPiece(str, role: .central)
         }
-        
     }
 }
 

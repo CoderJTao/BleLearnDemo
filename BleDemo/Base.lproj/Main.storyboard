@@ -81,21 +81,49 @@
                                     <constraint firstAttribute="trailing" secondItem="8SA-sw-c7O" secondAttribute="trailing" id="q5R-3z-H0G"/>
                                 </constraints>
                             </view>
+                            <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="C4t-JL-Knp">
+                                <rect key="frame" x="147.5" y="557" width="80" height="80"/>
+                                <color key="backgroundColor" red="1" green="0.25826269950000003" blue="0.20249309430000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="80" id="GI7-1d-hQM"/>
+                                    <constraint firstAttribute="width" constant="80" id="Ka5-dE-xLb"/>
+                                </constraints>
+                                <state key="normal" title="开始"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="40"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7Fq-qp-azl">
+                                <rect key="frame" x="30" y="94" width="315" height="49.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
+                            <constraint firstItem="7Fq-qp-azl" firstAttribute="top" secondItem="610-LN-wIr" secondAttribute="top" constant="30" id="4F5-pw-DZa"/>
                             <constraint firstItem="KoG-pX-qhO" firstAttribute="centerX" secondItem="ES1-bl-s7S" secondAttribute="centerX" id="ILx-yZ-1WN"/>
+                            <constraint firstItem="610-LN-wIr" firstAttribute="bottom" secondItem="C4t-JL-Knp" secondAttribute="bottom" constant="30" id="NPG-v1-gWn"/>
+                            <constraint firstItem="7Fq-qp-azl" firstAttribute="leading" secondItem="610-LN-wIr" secondAttribute="leading" constant="30" id="Nf1-9u-6Br"/>
+                            <constraint firstItem="610-LN-wIr" firstAttribute="trailing" secondItem="7Fq-qp-azl" secondAttribute="trailing" constant="30" id="QW0-81-S7c"/>
+                            <constraint firstItem="C4t-JL-Knp" firstAttribute="centerX" secondItem="ES1-bl-s7S" secondAttribute="centerX" id="RV1-E4-RXQ"/>
                             <constraint firstItem="KoG-pX-qhO" firstAttribute="centerY" secondItem="ES1-bl-s7S" secondAttribute="centerY" id="dEr-2J-qcn"/>
+                            <constraint firstItem="KoG-pX-qhO" firstAttribute="top" secondItem="7Fq-qp-azl" secondAttribute="bottom" constant="30" id="gLJ-2V-5HE"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="610-LN-wIr"/>
                     </view>
                     <connections>
+                        <outlet property="alertLbl" destination="7Fq-qp-azl" id="IFe-ax-wqG"/>
                         <outlet property="boardView" destination="KoG-pX-qhO" id="XLk-lv-h4h"/>
+                        <outlet property="handleBtn" destination="C4t-JL-Knp" id="z85-xW-3l9"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="y2M-jt-uyG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="415" y="719"/>
+            <point key="canvasLocation" x="317.60000000000002" y="742.5787106446777"/>
         </scene>
         <!--游戏房间-->
         <scene sceneID="RWM-Th-0dy">

@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		6C2186B122715B7E001A787C /* CreateGameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C2186B022715B7E001A787C /* CreateGameController.swift */; };
 		6C2186B322715B89001A787C /* FindGameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C2186B222715B89001A787C /* FindGameController.swift */; };
+		6C2E9B392271F5B600F0D3EB /* BleScaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C2E9B382271F5B600F0D3EB /* BleScaner.swift */; };
+		6C2E9B3B2271F5EE00F0D3EB /* BleLocalPeripher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C2E9B3A2271F5EE00F0D3EB /* BleLocalPeripher.swift */; };
 		6C9578D6227060B500267BC8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C9578D5227060B500267BC8 /* AppDelegate.swift */; };
 		6C9578D8227060B500267BC8 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C9578D7227060B500267BC8 /* ViewController.swift */; };
 		6C9578DB227060B500267BC8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6C9578D9227060B500267BC8 /* Main.storyboard */; };
@@ -21,6 +23,8 @@
 /* Begin PBXFileReference section */
 		6C2186B022715B7E001A787C /* CreateGameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateGameController.swift; sourceTree = "<group>"; };
 		6C2186B222715B89001A787C /* FindGameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindGameController.swift; sourceTree = "<group>"; };
+		6C2E9B382271F5B600F0D3EB /* BleScaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleScaner.swift; sourceTree = "<group>"; };
+		6C2E9B3A2271F5EE00F0D3EB /* BleLocalPeripher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BleLocalPeripher.swift; sourceTree = "<group>"; };
 		6C9578D2227060B500267BC8 /* BleDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BleDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C9578D5227060B500267BC8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6C9578D7227060B500267BC8 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -43,6 +47,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6C2E9B372271F56400F0D3EB /* New Group */ = {
+			isa = PBXGroup;
+			children = (
+				6C2E9B382271F5B600F0D3EB /* BleScaner.swift */,
+				6C2E9B3A2271F5EE00F0D3EB /* BleLocalPeripher.swift */,
+			);
+			path = "New Group";
+			sourceTree = "<group>";
+		};
 		6C9578C9227060B500267BC8 = {
 			isa = PBXGroup;
 			children = (
@@ -64,6 +77,7 @@
 			children = (
 				6C9578D5227060B500267BC8 /* AppDelegate.swift */,
 				6C9578D7227060B500267BC8 /* ViewController.swift */,
+				6C2E9B372271F56400F0D3EB /* New Group */,
 				6CE5842022719F90009E6D41 /* Common.swift */,
 				6C2186B022715B7E001A787C /* CreateGameController.swift */,
 				6C2186B222715B89001A787C /* FindGameController.swift */,
@@ -152,6 +166,8 @@
 				6C9578D6227060B500267BC8 /* AppDelegate.swift in Sources */,
 				6C2186B322715B89001A787C /* FindGameController.swift in Sources */,
 				6CE5842122719F90009E6D41 /* Common.swift in Sources */,
+				6C2E9B392271F5B600F0D3EB /* BleScaner.swift in Sources */,
+				6C2E9B3B2271F5EE00F0D3EB /* BleLocalPeripher.swift in Sources */,
 				6C2186B122715B7E001A787C /* CreateGameController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
