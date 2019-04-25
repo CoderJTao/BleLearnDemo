@@ -10,7 +10,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--主页-->
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="BleDemo" customModuleProvider="target" sceneMemberID="viewController">
@@ -18,32 +18,133 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="2sN-Ix-2SQ">
-                                <rect key="frame" x="0.0" y="64" width="375" height="603"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="r9Q-nl-Z45">
+                                <rect key="frame" x="125" y="211" width="125" height="47"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="0.86666666670000003" green="0.63137254899999995" blue="0.25882352939999997" alpha="1" colorSpace="calibratedRGB"/>
+                                <state key="normal" title="创建对局"/>
                                 <connections>
-                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="NON-XB-0qd"/>
-                                    <outlet property="delegate" destination="BYZ-38-t0r" id="pCy-Ej-Jjv"/>
+                                    <segue destination="sFh-ir-hTD" kind="show" id="c3k-Pc-GDJ"/>
                                 </connections>
-                            </tableView>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="A54-4I-iHP">
+                                <rect key="frame" x="125" y="145" width="125" height="47"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="0.86666666670000003" green="0.63137254899999995" blue="0.25882352939999997" alpha="1" colorSpace="calibratedRGB"/>
+                                <state key="normal" title="寻找对局"/>
+                                <connections>
+                                    <segue destination="IXq-Mr-ct9" kind="show" id="hnm-dQ-JGT"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4XF-aV-54A">
+                                <rect key="frame" x="125" y="310" width="125" height="47"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="0.86666666670000003" green="0.63137254899999995" blue="0.25882352939999997" alpha="1" colorSpace="calibratedRGB"/>
+                                <state key="normal" title="房间"/>
+                                <connections>
+                                    <segue destination="fXN-Ao-Iew" kind="show" id="mUI-s0-ifv"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        <constraints>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="2sN-Ix-2SQ" secondAttribute="bottom" id="BGp-Pk-beb"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="2sN-Ix-2SQ" secondAttribute="trailing" id="CTy-GC-K47"/>
-                            <constraint firstItem="2sN-Ix-2SQ" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="HhB-M9-yci"/>
-                            <constraint firstItem="2sN-Ix-2SQ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="QRM-Z3-BCA"/>
-                        </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
-                    <navigationItem key="navigationItem" id="j3Y-Pr-UTg"/>
-                    <connections>
-                        <outlet property="tableView" destination="2sN-Ix-2SQ" id="NeZ-nF-IEk"/>
-                    </connections>
+                    <navigationItem key="navigationItem" title="主页" id="j3Y-Pr-UTg"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="318" y="28"/>
+            <point key="canvasLocation" x="317.60000000000002" y="27.436281859070466"/>
+        </scene>
+        <!--游戏房间-->
+        <scene sceneID="jOC-ih-Q31">
+            <objects>
+                <viewController title="游戏房间" id="fXN-Ao-Iew" customClass="GameController" customModule="BleDemo" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="ES1-bl-s7S">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KoG-pX-qhO">
+                                <rect key="frame" x="27.5" y="173.5" width="320" height="320"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="board" translatesAutoresizingMaskIntoConstraints="NO" id="8SA-sw-c7O">
+                                        <rect key="frame" x="0.0" y="0.0" width="320" height="320"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    </imageView>
+                                </subviews>
+                                <color key="backgroundColor" red="0.70883756880000004" green="0.72954994439999998" blue="0.78753334279999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstItem="8SA-sw-c7O" firstAttribute="leading" secondItem="KoG-pX-qhO" secondAttribute="leading" id="CAA-d4-zT9"/>
+                                    <constraint firstAttribute="width" constant="320" id="MAH-91-3aF"/>
+                                    <constraint firstItem="8SA-sw-c7O" firstAttribute="top" secondItem="KoG-pX-qhO" secondAttribute="top" id="Nn4-d3-Mbc"/>
+                                    <constraint firstAttribute="bottom" secondItem="8SA-sw-c7O" secondAttribute="bottom" id="gL4-UW-d6m"/>
+                                    <constraint firstAttribute="height" constant="320" id="lyA-Dq-NeM"/>
+                                    <constraint firstAttribute="trailing" secondItem="8SA-sw-c7O" secondAttribute="trailing" id="q5R-3z-H0G"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="KoG-pX-qhO" firstAttribute="centerX" secondItem="ES1-bl-s7S" secondAttribute="centerX" id="ILx-yZ-1WN"/>
+                            <constraint firstItem="KoG-pX-qhO" firstAttribute="centerY" secondItem="ES1-bl-s7S" secondAttribute="centerY" id="dEr-2J-qcn"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="610-LN-wIr"/>
+                    </view>
+                    <connections>
+                        <outlet property="boardView" destination="KoG-pX-qhO" id="XLk-lv-h4h"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="y2M-jt-uyG" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="415" y="719"/>
+        </scene>
+        <!--游戏房间-->
+        <scene sceneID="RWM-Th-0dy">
+            <objects>
+                <viewController title="游戏房间" id="sFh-ir-hTD" customClass="CreateGameController" customModule="BleDemo" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="bzP-xj-e4n">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <viewLayoutGuide key="safeArea" id="Pof-2Z-6SS"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ka2-OS-v8F" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1230" y="605"/>
+        </scene>
+        <!--寻找对局-->
+        <scene sceneID="yJM-iB-bK4">
+            <objects>
+                <viewController title="寻找对局" id="IXq-Mr-ct9" customClass="FindGameController" customModule="BleDemo" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="lLQ-t3-PCc">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Awl-Fh-W7f">
+                                <rect key="frame" x="0.0" y="64" width="375" height="603"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="IXq-Mr-ct9" id="th1-7B-nkG"/>
+                                    <outlet property="delegate" destination="IXq-Mr-ct9" id="WU3-9g-PXZ"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="Awl-Fh-W7f" firstAttribute="top" secondItem="ZHV-tE-hEa" secondAttribute="top" id="5fh-BM-0nb"/>
+                            <constraint firstItem="ZHV-tE-hEa" firstAttribute="trailing" secondItem="Awl-Fh-W7f" secondAttribute="trailing" id="6gm-0Z-EIo"/>
+                            <constraint firstItem="ZHV-tE-hEa" firstAttribute="bottom" secondItem="Awl-Fh-W7f" secondAttribute="bottom" id="YIa-Fz-djt"/>
+                            <constraint firstItem="Awl-Fh-W7f" firstAttribute="leading" secondItem="ZHV-tE-hEa" secondAttribute="leading" id="Ygg-nB-T0e"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="ZHV-tE-hEa"/>
+                    </view>
+                    <connections>
+                        <outlet property="tableView" destination="Awl-Fh-W7f" id="O7b-QU-JgQ"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="klK-CB-3MF" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1230" y="-122"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="E7B-Ns-xAW">
@@ -62,4 +163,7 @@
             <point key="canvasLocation" x="-474" y="29"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="board" width="322" height="322"/>
+    </resources>
 </document>
