@@ -11,6 +11,8 @@ import CoreBluetooth
 
 class FindGameController: UIViewController {
     
+    private var scaner: BleScaner?
+    
     private var status = ConnectStatus.waiting
     
     @IBOutlet weak var tableView: UITableView!
@@ -24,7 +26,6 @@ class FindGameController: UIViewController {
     
     var isConnected = false
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -32,6 +33,7 @@ class FindGameController: UIViewController {
         
         self.centralManager = CBCentralManager(delegate: self, queue: nil)
         
+        self.scaner = BleScaner()
     }
     
     private func startScan() {
@@ -40,6 +42,27 @@ class FindGameController: UIViewController {
     }
     
 }
+
+//extension FindGameController: BleScanerDelegate {
+//    func scaner(_ scaner: BleScaner, didFound peripherals: [CBPeripheral]) {
+//        self.peripheralArray = peripherals
+//        self.tableView.reloadData()
+//    }
+//
+//    func scaner(_ scaner: BleScaner, didConnect peripheral: CBPeripheral) {
+//
+//    }
+//
+//    func scaner(_ scaner: BleScaner, didDiscoverReadableCharacteristic characteristic: CBCharacteristic) {
+//
+//    }
+//
+//    func scaner(_ scaner: BleScaner, didDiscoverWriteableCharacteristic characteristic: CBCharacteristic) {
+//
+//    }
+//}
+
+
 
 // MARK: - CBCentralManagerDelegate
 extension FindGameController: CBCentralManagerDelegate {
@@ -167,10 +190,6 @@ extension FindGameController: CBPeripheralDelegate {
         
     }
     
-    
-    
-    
-    
     /*
      有的 Characteristic 的值可能仅仅是可写的，或者不是可写的。决定 Characteristic 的值是否可写，需要通过查看 Characteristic 的 properties 属性是否包含 CBCharacteristicPropertyWriteWithoutResponse 或者 CBCharacteristicPropertyWrite 常量来判断的。
      */
@@ -221,12 +240,8 @@ extension FindGameController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.configPeripheral = self.peripheralArray[indexPath.row]
-        
-        self.configPeripheral?.delegate = self
-        
-        if let per = self.configPeripheral {
-            self.centralManager?.connect(per, options: nil)
-        }
+        let peripheral = self.peripheralArray[indexPath.row]
+        self.configPeripheral = peripheral
+        self.scaner?.connect(peripheral)
     }
 }

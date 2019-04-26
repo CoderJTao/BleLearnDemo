@@ -9,8 +9,22 @@
 import Foundation
 import CoreBluetooth
 
+protocol BleScanerDelegate: AnyObject {
+    func scaner(_ scaner: BleScaner, didFound peripherals: [CBPeripheral])
+    
+    func scaner(_ scaner: BleScaner, didConnect peripheral: CBPeripheral)
+    
+    func scaner(_ scaner: BleScaner, didDiscoverReadableCharacteristic  characteristic: CBCharacteristic)
+    
+    func scaner(_ scaner: BleScaner, didDiscoverWriteableCharacteristic characteristic: CBCharacteristic)
+    
+    func scaner(_ scaner: BleScaner, didUpdateNotification characteristic: CBCharacteristic, error: Error?)
+}
+
 class BleScaner: NSObject {
     private var status = ConnectStatus.waiting
+    
+    weak var delegate: BleScanerDelegate?
     
     private var centralManager: CBCentralManager?
     
@@ -30,6 +44,19 @@ class BleScaner: NSObject {
     private func startScan() {
         print(#function)
         self.centralManager?.scanForPeripherals(withServices: [CBUUID(string: UUID_SERVICE)], options: [CBPeripheralManagerOptionShowPowerAlertKey : true])
+    }
+    
+    func connect(_ peripheral: CBPeripheral) {
+        self.configPeripheral = peripheral
+        
+        self.configPeripheral?.delegate = self
+        
+        self.centralManager?.connect(peripheral, options: nil)
+    }
+    
+    func writeValue(_ value: String, for characteristic: CBCharacteristic) {
+        
+        
     }
 }
 
@@ -51,6 +78,7 @@ extension BleScaner: CBCentralManagerDelegate {
             print("poweredOff")
         case CBManagerState.poweredOn:
             print("poweredOn")
+            startScan()
         default:
             print("unknow state")
         }
@@ -64,7 +92,7 @@ extension BleScaner: CBCentralManagerDelegate {
         
         if !self.peripheralArray.contains(peripheral) {
             self.peripheralArray.append(peripheral)
-//            self.tableView.reloadData()
+            self.delegate?.scaner(self, didFound: self.peripheralArray)
         }
     }
     
@@ -132,7 +160,14 @@ extension BleScaner: CBPeripheralDelegate {
                 
                 // 订阅指定 Characteristic 的值
                 peripheral.setNotifyValue(true, for: character)
+                
+                self.delegate?.scaner(self, didDiscoverReadableCharacteristic: character)
             }
+            
+            if let character = writeChar {
+                self.delegate?.scaner(self, didDiscoverWriteableCharacteristic: character)
+            }
+            
             //
             //            // 写入值
             //            if let character = writeChar {

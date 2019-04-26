@@ -14,6 +14,17 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        
+    }
+    
+    @IBAction func findGameClick(_ sender: Any) {
+        let vc = GameController()
+        vc.setRole(.central)
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    @IBAction func createGameClick(_ sender: Any) {
+        let vc = GameController()
+        vc.setRole(.peripheral)
+        self.navigationController?.pushViewController(vc, animated: true)
     }
 }

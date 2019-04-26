@@ -20,6 +20,7 @@ let READY_TO_BEGIN = "ReadyToBegin"
 let START_GAME = "RockAndRoll"
 
 enum Role {
+    case unknow
     case peripheral
     case central
 }

@@ -176,7 +176,7 @@ extension CreateGameController: CBPeripheralManagerDelegate {
     /// 当一个连接的 Central 订阅一个或多个你的 Characteristic 值时
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, characteristic: CBCharacteristic) {
         
-        print("peripheralManager didSubscribeTo characteristic")
+        print(#function)
         
         let updateValue = Data()
         

@@ -9,8 +9,19 @@
 import Foundation
 import CoreBluetooth
 
+protocol LocalPeripherDelegate: AnyObject {
+    // 开始了广播，可被发现
+    func localPeripher(_ local: LocalPeripher, peripher: CBPeripheralManager, readCharacteristic: CBMutableCharacteristic, writeCharacteristic: CBMutableCharacteristic, error: Error?)
+    
+    func localPeripher(_ local: LocalPeripher, handleReadRequest result: Bool)
+    
+    func localPeripher(_ local: LocalPeripher, handleWriteRequest result: Bool)
+}
+
 class LocalPeripher: NSObject {
     private var status = ConnectStatus.waiting
+    
+    weak var delegate: LocalPeripherDelegate?
     
     var myPeripheral: CBPeripheralManager?
     
@@ -66,6 +77,10 @@ class LocalPeripher: NSObject {
          */
         myPeripheral?.startAdvertising([CBAdvertisementDataServiceUUIDsKey: [myService!.uuid]])
     }
+    
+    func writeLocalReadableForNotify(_ value: String) {
+        
+    }
 }
 
 extension LocalPeripher: CBPeripheralManagerDelegate {
@@ -106,6 +121,12 @@ extension LocalPeripher: CBPeripheralManagerDelegate {
     /// 当你在本地设备中广播一些数据时
     func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
         print(#function)
+        guard let read = myCharacteristic_beRead,
+            let write = myCharacteristic_beWrite,
+            let peripher = myPeripheral
+            else { return }
+        
+        self.delegate?.localPeripher(self, peripher: peripher, readCharacteristic: read, writeCharacteristic: write, error: error)
     }
     
     
@@ -130,8 +151,6 @@ extension LocalPeripher: CBPeripheralManagerDelegate {
                 print("")
             }
             
-            
-            
             guard let value = beRead.value else {
                 print("myCharacteristic_beRead value 为空")
                 return
@@ -140,11 +159,15 @@ extension LocalPeripher: CBPeripheralManagerDelegate {
             //确保读取请求的位置没有超出 Characteristic 的值的边界
             if request.offset > value.count {
                 myPeripheral?.respond(to: request, withResult: CBATTError.Code.invalidOffset)
+                
+                self.delegate?.localPeripher(self, handleReadRequest: false)
             } else {
                 let range = Range(NSRange(location: request.offset, length: value.count - request.offset))!
                 request.value = value.subdata(in: range)
                 
                 myPeripheral?.respond(to: request, withResult: CBATTError.Code.success)
+                
+                self.delegate?.localPeripher(self, handleReadRequest: true)
             }
         }
     }
@@ -162,13 +185,16 @@ extension LocalPeripher: CBPeripheralManagerDelegate {
         }
         guard let request = temp else {
             myPeripheral?.respond(to: requests.first!, withResult: CBATTError.Code.writeNotPermitted)
+            
+            self.delegate?.localPeripher(self, handleWriteRequest: false)
             return
         }
         
         // 确认写入请求与自己的特征对应时
         myCharacteristic_beWrite?.value = request.value
         
-        myPeripheral?.respond(to: requests.first!, withResult: CBATTError.Code.success)
+        myPeripheral?.respond(to: request, withResult: CBATTError.Code.success)
+        self.delegate?.localPeripher(self, handleWriteRequest: true)
     }
     
     
@@ -181,8 +207,7 @@ extension LocalPeripher: CBPeripheralManagerDelegate {
         /*
          当你调用这个方法给订阅的 Central 发送通知时，你可以通过最后的那个参数来指定要发送的 Central，示例代码中的参数为 nil，表明将会发送通知给所有连接且订阅的 Central，没有订阅的 Central 则会被忽略。
          */
-        let result = myPeripheral?.updateValue(updateValue, for: characteristic as! CBMutableCharacteristic, onSubscribedCentrals: nil)
-        
+        myPeripheral?.updateValue(updateValue, for: characteristic as! CBMutableCharacteristic, onSubscribedCentrals: nil)
     }
     
     /*
@@ -195,7 +220,7 @@ extension LocalPeripher: CBPeripheralManagerDelegate {
      
      */
     func peripheralManagerIsReady(toUpdateSubscribers peripheral: CBPeripheralManager) {
-        
+        print(#function)
     }
 }
 
