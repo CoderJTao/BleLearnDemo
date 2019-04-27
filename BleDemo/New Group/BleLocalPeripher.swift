@@ -1,5 +1,5 @@
 //
-//  BleLocalPeripher.swift
+//  BleBleLocalPeripher.swift
 //  BleDemo
 //
 //  Created by JiangT on 2019/4/25.
@@ -9,19 +9,17 @@
 import Foundation
 import CoreBluetooth
 
-protocol LocalPeripherDelegate: AnyObject {
+protocol BleLocalPeripherDelegate: AnyObject {
     // 开始了广播，可被发现
-    func localPeripher(_ local: LocalPeripher, peripher: CBPeripheralManager, readCharacteristic: CBMutableCharacteristic, writeCharacteristic: CBMutableCharacteristic, error: Error?)
+    func localPeripher(_ local: BleLocalPeripher, peripher: CBPeripheralManager, readCharacteristic: CBMutableCharacteristic, writeCharacteristic: CBMutableCharacteristic, error: Error?)
     
-    func localPeripher(_ local: LocalPeripher, handleReadRequest result: Bool)
-    
-    func localPeripher(_ local: LocalPeripher, handleWriteRequest result: Bool)
+    func localPeripher(_ local: BleLocalPeripher, didUpdateValue value: String)
 }
 
-class LocalPeripher: NSObject {
-    private var status = ConnectStatus.waiting
+class BleLocalPeripher: NSObject {
+    var status = ConnectStatus.waiting
     
-    weak var delegate: LocalPeripherDelegate?
+    weak var delegate: BleLocalPeripherDelegate?
     
     var myPeripheral: CBPeripheralManager?
     
@@ -75,15 +73,24 @@ class LocalPeripher: NSObject {
         /*
          
          */
-        myPeripheral?.startAdvertising([CBAdvertisementDataServiceUUIDsKey: [myService!.uuid]])
+        myPeripheral?.startAdvertising([CBAdvertisementDataServiceUUIDsKey: [myService!.uuid], CBAdvertisementDataLocalNameKey: "我创建了一个房间"])
     }
     
+    // 改变自身readable的zvalue，是订阅者获取到通知，以传输数据及改变状态
     func writeLocalReadableForNotify(_ value: String) {
+        guard let updateValue = value.toData(), let characteristic = myCharacteristic_beRead else {
+            return
+        }
         
+        if value == START_GAME {
+            self.status = .isPlaying
+        }
+        
+        myPeripheral?.updateValue(updateValue, for: characteristic , onSubscribedCentrals: nil)
     }
 }
 
-extension LocalPeripher: CBPeripheralManagerDelegate {
+extension BleLocalPeripher: CBPeripheralManagerDelegate {
     /// 当调用添加服务的方法时，回调
     func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
         if error != nil {
@@ -126,6 +133,8 @@ extension LocalPeripher: CBPeripheralManagerDelegate {
             let peripher = myPeripheral
             else { return }
         
+        self.status = .beforeReady
+        
         self.delegate?.localPeripher(self, peripher: peripher, readCharacteristic: read, writeCharacteristic: write, error: error)
     }
     
@@ -141,34 +150,23 @@ extension LocalPeripher: CBPeripheralManagerDelegate {
         
         /// 判断request是否是自己的认可的
         if request.characteristic.uuid.isEqual(CBUUID(string: UUID_READABLE)) {
-            switch status {
-            case .waiting:
-                // 写入进入准备状态的值
-                beRead.value = READY_TO_BEGIN.toData()
-            case .ready: break
-            //
-            default:
-                print("")
-            }
-            
             guard let value = beRead.value else {
                 print("myCharacteristic_beRead value 为空")
                 return
             }
             
+            request.value = value
+            myPeripheral?.respond(to: request, withResult: CBATTError.Code.success)
+            
             //确保读取请求的位置没有超出 Characteristic 的值的边界
-            if request.offset > value.count {
-                myPeripheral?.respond(to: request, withResult: CBATTError.Code.invalidOffset)
-                
-                self.delegate?.localPeripher(self, handleReadRequest: false)
-            } else {
-                let range = Range(NSRange(location: request.offset, length: value.count - request.offset))!
-                request.value = value.subdata(in: range)
-                
-                myPeripheral?.respond(to: request, withResult: CBATTError.Code.success)
-                
-                self.delegate?.localPeripher(self, handleReadRequest: true)
-            }
+//            if request.offset > value.count {
+//                myPeripheral?.respond(to: request, withResult: CBATTError.Code.invalidOffset)
+//            } else {
+//                let range = Range(NSRange(location: request.offset, length: value.count - request.offset))!
+//                request.value = value.subdata(in: range)
+//
+//                myPeripheral?.respond(to: request, withResult: CBATTError.Code.success)
+//            }
         }
     }
     
@@ -185,16 +183,43 @@ extension LocalPeripher: CBPeripheralManagerDelegate {
         }
         guard let request = temp else {
             myPeripheral?.respond(to: requests.first!, withResult: CBATTError.Code.writeNotPermitted)
-            
-            self.delegate?.localPeripher(self, handleWriteRequest: false)
+            return
+        }
+        
+        // 判断写入的数据
+        guard let commingValue = request.value?.toString() else {
             return
         }
         
         // 确认写入请求与自己的特征对应时
-        myCharacteristic_beWrite?.value = request.value
+        switch commingValue {
+        case I_AM_COMMING:
+            self.status = .isReady
+            // 有玩家进入房间，提示其准备
+            guard let updateValue = READY_TO_BEGIN.toData(), let characteristic = myCharacteristic_beRead else {
+                return
+            }
+            myPeripheral?.updateValue(updateValue, for: characteristic , onSubscribedCentrals: nil)
+        case I_AM_READY:
+            print("waiting creater to start game")
+            self.status = .isReady
+        case START_GAME:
+            self.status = .isPlaying
+            // 开始放置自己的棋子
+        case GAME_OVER:
+            self.status = .gameOver
+        case PLAY_AGAIN:
+            self.status = .isReady
+        default:
+            // 收到的是棋子坐标的信息
+            print(commingValue)
+        }
+        
+        self.delegate?.localPeripher(self, didUpdateValue: commingValue)
+        
+//        myCharacteristic_beWrite?.value = request.value
         
         myPeripheral?.respond(to: request, withResult: CBATTError.Code.success)
-        self.delegate?.localPeripher(self, handleWriteRequest: true)
     }
     
     

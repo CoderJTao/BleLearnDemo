@@ -17,14 +17,19 @@ class ViewController: UIViewController {
     }
     
     @IBAction func findGameClick(_ sender: Any) {
-        let vc = GameController()
-        vc.setRole(.central)
-        self.navigationController?.pushViewController(vc, animated: true)
+        
+        let sb = UIStoryboard(name: "Main", bundle: nil)
+        if let vc = sb.instantiateViewController(withIdentifier: "GameVC") as? GameController {
+            vc.setRole(.central)
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
     }
     
     @IBAction func createGameClick(_ sender: Any) {
-        let vc = GameController()
-        vc.setRole(.peripheral)
-        self.navigationController?.pushViewController(vc, animated: true)
+        let sb = UIStoryboard(name: "Main", bundle: nil)
+        if let vc = sb.instantiateViewController(withIdentifier: "GameVC") as? GameController {
+            vc.setRole(.peripheral)
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
     }
 }

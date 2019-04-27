@@ -18,11 +18,11 @@ protocol BleScanerDelegate: AnyObject {
     
     func scaner(_ scaner: BleScaner, didDiscoverWriteableCharacteristic characteristic: CBCharacteristic)
     
-    func scaner(_ scaner: BleScaner, didUpdateNotification characteristic: CBCharacteristic, error: Error?)
+    func scaner(_ scaner: BleScaner, didUpdateNotifyValue value: String)
 }
 
 class BleScaner: NSObject {
-    private var status = ConnectStatus.waiting
+    var status = ConnectStatus.waiting
     
     weak var delegate: BleScanerDelegate?
     
@@ -32,6 +32,9 @@ class BleScaner: NSObject {
     private var peripheralArray: [CBPeripheral] = []
     
     private var configPeripheral: CBPeripheral?
+    
+    private var myCharacteristic_toRead: CBCharacteristic?
+    private var myCharacteristic_toWrite: CBCharacteristic?
     
     var isConnected = false
     
@@ -46,17 +49,26 @@ class BleScaner: NSObject {
         self.centralManager?.scanForPeripherals(withServices: [CBUUID(string: UUID_SERVICE)], options: [CBPeripheralManagerOptionShowPowerAlertKey : true])
     }
     
-    func connect(_ peripheral: CBPeripheral) {
-        self.configPeripheral = peripheral
+    func writeValue(_ value: String) {
+        guard let characteristic = myCharacteristic_toWrite else {
+            return
+        }
         
-        self.configPeripheral?.delegate = self
+        switch value {
+        case I_AM_COMMING:
+            self.status = .beforeReady
+        case I_AM_READY:
+            self.status = .isReady
+        case GAME_OVER:
+            self.status = .gameOver
+        default:
+            // 棋子的坐标
+            print("player put his piece value: \(value)")
+        }
         
-        self.centralManager?.connect(peripheral, options: nil)
-    }
-    
-    func writeValue(_ value: String, for characteristic: CBCharacteristic) {
-        
-        
+        if let data = value.toData() {
+            self.configPeripheral?.writeValue(data, for: characteristic, type: .withResponse)
+        }
     }
 }
 
@@ -90,9 +102,21 @@ extension BleScaner: CBCentralManagerDelegate {
         
         print("发现了一个外设：\(peripheral.name)")
         
-        if !self.peripheralArray.contains(peripheral) {
-            self.peripheralArray.append(peripheral)
-            self.delegate?.scaner(self, didFound: self.peripheralArray)
+        if let serviceUUIDs = advertisementData[CBAdvertisementDataServiceUUIDsKey] as? [CBUUID] {
+            if let uuid = serviceUUIDs.first?.uuidString, uuid == UUID_SERVICE {
+                self.configPeripheral = peripheral
+                
+                self.configPeripheral?.delegate = self
+                
+                if !self.peripheralArray.contains(peripheral) {
+                    self.peripheralArray.append(peripheral)
+                    self.delegate?.scaner(self, didFound: self.peripheralArray)
+                }
+                
+                self.centralManager?.connect(peripheral, options: nil)
+                
+                self.centralManager?.stopScan()
+            }
         }
     }
     
@@ -156,23 +180,19 @@ extension BleScaner: CBPeripheralDelegate {
             
             // 读取值
             if let character = readChar {
-                peripheral.readValue(for: character)
-                
                 // 订阅指定 Characteristic 的值
+                self.myCharacteristic_toRead = character
+                
                 peripheral.setNotifyValue(true, for: character)
                 
                 self.delegate?.scaner(self, didDiscoverReadableCharacteristic: character)
             }
             
             if let character = writeChar {
+                
+                self.myCharacteristic_toWrite = character
                 self.delegate?.scaner(self, didDiscoverWriteableCharacteristic: character)
             }
-            
-            //
-            //            // 写入值
-            //            if let character = writeChar {
-            //                peripheral.writeValue(Data(), for: character, type: .withResponse)
-            //            }
         }
     }
     
@@ -186,7 +206,25 @@ extension BleScaner: CBPeripheralDelegate {
             return
         }
         
+        guard let message = characteristic.value?.toString() else {
+            return
+        }
+        
         print("读取需要的值")
+        switch message {
+        case READY_TO_BEGIN:
+            print("player can ready for game")
+        case START_GAME:
+            print("write start game too")
+            self.status = .isPlaying
+        case GAME_OVER:
+            self.status = .gameOver
+        default:
+            // 收到棋子的坐标信息
+            print("piece position value: \(message)")
+        }
+        
+        self.delegate?.scaner(self, didUpdateNotifyValue: message)
     }
     
     /*
@@ -194,10 +232,15 @@ extension BleScaner: CBPeripheralDelegate {
      */
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
         print(#function)
+        
+        if error == nil {
+            return
+        }
+        
+//        guard let readable = myCharacteristic_toRead else { return }
+        
+//        self.configPeripheral?.readValue(for: readable)
     }
-    
-    
-    
     
     
     /*
@@ -215,19 +258,11 @@ extension BleScaner: CBPeripheralDelegate {
             return
         }
         
-        let message = characteristic.value?.toString()
-        
-        switch message {
-        case READY_TO_BEGIN:
-            print("I can ready for game")
-        // 我可以准备了
-        case START_GAME:
-            print("Game is playing")
-        // 我方可开始放置
-        default:
-            print("")
-        }        
+        if characteristic.isNotifying {
+            peripheral.readValue(for: characteristic)
+        } else {
+            print("characteristic.isNotifying false")
+        }
     }
-    
 }
 
