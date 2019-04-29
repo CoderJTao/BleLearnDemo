@@ -59,8 +59,6 @@ class BleScaner: NSObject {
             self.status = .beforeReady
         case I_AM_READY:
             self.status = .isReady
-        case GAME_OVER:
-            self.status = .gameOver
         default:
             // 棋子的坐标
             print("player put his piece value: \(value)")
@@ -223,7 +221,6 @@ extension BleScaner: CBPeripheralDelegate {
         default:
             // 收到棋子的坐标信息
             print("Receive piece position from Peripheral")
-            print("piece position value: \(message)")
             
             if message.hasPrefix("Last:") {
                 // 对方落子之后赢得比赛

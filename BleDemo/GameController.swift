@@ -105,6 +105,36 @@ extension GameController {
         putPiece(putPosition, role: self.currentRole)
         
         self.boardView.isUserInteractionEnabled = false
+        
+        addPieces(putPosition)
+    }
+    
+    /// 将下的棋子保存起来，用于判断是否胜利
+    private func addPieces(_ value: String) {
+        let arr = value.components(separatedBy: "-")
+        
+        // 添加到对应数组中，判断是否有玩家成功
+        if self.currentRole == .central {
+            self.centralArr.append(CGPoint(x: Int(arr.first!)!, y: Int(arr.last!)!))
+        } else if self.currentRole == .peripheral {
+            self.peripherArr.append(CGPoint(x: Int(arr.first!)!, y: Int(arr.last!)!))
+        }
+        
+        if isWin((self.currentRole == .central ? self.centralArr : self.peripherArr)) {
+            if self.currentRole == .central {
+                scaner?.writeValue("Last:\(value)")
+            } else {
+                local?.writeLocalReadableForNotify("Last:\(value)")
+            }
+            self.alertLbl.text = "恭喜你胜利了。"
+        } else {
+            if self.currentRole == .central {
+                self.scaner?.writeValue(value)
+            } else {
+                self.local?.writeLocalReadableForNotify(value)
+            }
+            self.alertLbl.text = "等待对方落子"
+        }
     }
     
     private func canPlace(_ point: CGPoint) -> Bool {
@@ -171,35 +201,123 @@ extension GameController {
         piece.center = CGPoint(x: x, y: y)
         
         self.boardView.addSubview(piece)
-        
-        // 添加到对应数组中，判断是否有玩家成功
-        if role == .central {
-            self.centralArr.append(CGPoint(x: Int(arr.first!)!, y: Int(arr.last!)!))
-        } else if role == .peripheral {
-            self.peripherArr.append(CGPoint(x: Int(arr.first!)!, y: Int(arr.last!)!))
-        }
-        
-        if isWin((self.currentRole == .central ? self.centralArr : self.peripherArr)) {
-            if self.currentRole == .central {
-                scaner?.writeValue("Last:\(coordinates)")
-            } else {
-                local?.writeLocalReadableForNotify("Last:\(coordinates)")
-            }
-            self.alertLbl.text = "恭喜你胜利了。"
-        } else {
-            if self.currentRole == .central {
-                self.scaner?.writeValue(coordinates)
-            } else {
-                self.local?.writeLocalReadableForNotify(coordinates)
-            }
-            self.alertLbl.text = "等待对方落子"
-        }
     }
     
     /// 判断当前角色是否成功
     private func isWin(_ pointArr: [CGPoint]) -> Bool {
-        
-        
+        for p in pointArr {
+            let x = p.x
+            let y = p.y
+            // 横向
+            let horizontal: ()->(Bool) = {
+                var count = 1
+                // x减小方向
+                var temp = x-1
+                while temp >= 0 {
+                    if pointArr.contains(CGPoint(x: temp, y: y)) {
+                        count += 1
+                        temp -= 1
+                    } else { break }
+                }
+                
+                // x增加方向
+                var temp1 = x+1
+                while temp1 <= 16 {
+                    if pointArr.contains(CGPoint(x: temp1, y: y)) {
+                        count += 1
+                        temp1 += 1
+                    } else { break }
+                }
+                
+                return count == 5
+            }
+            
+            
+            // 纵向
+            let vertical: ()->(Bool) = {
+                var count = 1
+                // y减小方向
+                var temp = y-1
+                while temp >= 0 {
+                    if pointArr.contains(CGPoint(x: x, y: temp)) {
+                        count += 1
+                        temp -= 1
+                    } else { break }
+                }
+                
+                // y增加方向
+                var temp1 = y+1
+                while temp1 <= 16 {
+                    if pointArr.contains(CGPoint(x: x, y: temp1)) {
+                        count += 1
+                        temp1 += 1
+                    } else { break }
+                }
+                return false
+            }
+            
+            // 正斜率方向
+            let oblique_positive: ()->(Bool) = {
+                var count = 1
+                
+                // 斜线方向，斜率为1
+                // 值减小方向
+                var temp_x = x - 1
+                var temp_y = y - 1
+                while temp_x >= 0 && temp_y > 0 {
+                    if pointArr.contains(CGPoint(x: temp_x, y: temp_y)) {
+                        count += 1
+                        temp_x -= 1
+                        temp_y -= 1
+                    } else { break }
+                }
+                
+                var temp_x1 = x + 1
+                var temp_y1 = y + 1
+                while temp_x1 <= 16 && temp_y1 <= 16 {
+                    if pointArr.contains(CGPoint(x: temp_x1, y: temp_y1)) {
+                        count += 1
+                        temp_x1 -= 1
+                        temp_y1 -= 1
+                    } else { break }
+                }
+                
+                return count == 5
+            }
+            
+            // 负斜率方向
+            let oblique_negative: ()->(Bool) = {
+                var count = 1
+                
+                // 斜线方向，斜率为 -1
+                // 值减小方向
+                var temp_x = x - 1
+                var temp_y = y + 1
+                while temp_x >= 0 && temp_y <= 16 {
+                    if pointArr.contains(CGPoint(x: temp_x, y: temp_y)) {
+                        count += 1
+                        temp_x -= 1
+                        temp_y += 1
+                    } else { break }
+                }
+                
+                var temp_x1 = x + 1
+                var temp_y1 = y - 1
+                while temp_x1 <= 16 && temp_y1 >= 0 {
+                    if pointArr.contains(CGPoint(x: temp_x1, y: temp_y1)) {
+                        count += 1
+                        temp_x1 += 1
+                        temp_y1 -= 1
+                    } else { break }
+                }
+                
+                return count == 5
+            }
+            
+            if horizontal() || vertical() || oblique_positive() || oblique_negative() {
+                return true
+            }
+        }
         return false
     }
     
