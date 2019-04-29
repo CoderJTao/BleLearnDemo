@@ -100,7 +100,6 @@ extension BleScaner: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         print(#function)
         
-        print("发现了一个外设：\(peripheral.name)")
         
         if let serviceUUIDs = advertisementData[CBAdvertisementDataServiceUUIDsKey] as? [CBUUID] {
             if let uuid = serviceUUIDs.first?.uuidString, uuid == UUID_SERVICE {
@@ -130,6 +129,14 @@ extension BleScaner: CBCentralManagerDelegate {
          */
         self.configPeripheral?.discoverServices([CBUUID(string: UUID_SERVICE)])
     }
+    
+    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+        print(#function)
+    }
+    
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        print(#function)
+    }
 }
 
 
@@ -141,7 +148,6 @@ extension BleScaner: CBPeripheralDelegate {
         var service: CBService?
         if let services = peripheral.services {
             for ser in services {
-                print("Discover service: \(ser)")
                 if ser.uuid.isEqual(CBUUID(string: UUID_SERVICE)) {
                     service = ser
                     break
@@ -169,8 +175,6 @@ extension BleScaner: CBPeripheralDelegate {
             var readChar: CBCharacteristic?
             
             for characteri in characteristics {
-                print("Disvocer characteristic: \(characteri)")
-                
                 if characteri.uuid.isEqual(CBUUID(string: UUID_READABLE)) {
                     readChar = characteri
                 } else if characteri.uuid.isEqual(CBUUID(string: UUID_WRITEABLE)) {
@@ -210,18 +214,22 @@ extension BleScaner: CBPeripheralDelegate {
             return
         }
         
-        print("读取需要的值")
         switch message {
         case READY_TO_BEGIN:
-            print("player can ready for game")
+            print("Receive ReadyToBegin from Peripheral")
         case START_GAME:
-            print("write start game too")
+            print("Receive Start Game from Peripheral")
             self.status = .isPlaying
-        case GAME_OVER:
-            self.status = .gameOver
         default:
             // 收到棋子的坐标信息
+            print("Receive piece position from Peripheral")
             print("piece position value: \(message)")
+            
+            if message.hasPrefix("Last:") {
+                // 对方落子之后赢得比赛
+                print("Receive Game Over from Peripheral")
+                self.status = .gameOver
+            }
         }
         
         self.delegate?.scaner(self, didUpdateNotifyValue: message)

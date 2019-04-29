@@ -20,7 +20,6 @@ let I_AM_COMMING = "I am comming"          // from centralManager
 let READY_TO_BEGIN = "ReadyToBegin"        // from Peripheral
 let I_AM_READY = "I am ready"              // from centralManager
 let START_GAME = "Let's rock and roll"     // from both
-let GAME_OVER = "Game over"                // from both
 let PLAY_AGAIN = "Play again"              // from both
 
 enum Role {

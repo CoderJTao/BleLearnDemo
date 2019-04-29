@@ -12,6 +12,9 @@ import CoreBluetooth
 class GameController: UIViewController {
     private var currentRole: Role = .unknow
     
+    private var centralArr: [CGPoint] = []
+    private var peripherArr: [CGPoint] = []
+    
     // MARK: - UI
     @IBOutlet weak var boardView: UIImageView!
     @IBOutlet weak var handleBtn: UIButton!
@@ -49,7 +52,6 @@ class GameController: UIViewController {
             self.local?.delegate = self
         }
         
-        self.boardView.isUserInteractionEnabled = true
         self.boardView.addGestureRecognizer(self.tapGesture)
     }
     
@@ -95,15 +97,30 @@ extension GameController {
         
         let putPosition = getCoordinates(point)
         
-        if self.currentRole == .central {
-            self.scaner?.writeValue(putPosition)
-        } else {
-            self.local?.writeLocalReadableForNotify(putPosition)
+        if !canPlace(point) {
+            print("Already been placed")
+            return
         }
         
         putPiece(putPosition, role: self.currentRole)
         
-        print(putPosition)
+        self.boardView.isUserInteractionEnabled = false
+    }
+    
+    private func canPlace(_ point: CGPoint) -> Bool {
+        for p in self.centralArr {
+            if p.x == point.x && p.y == point.y {
+                return false
+            }
+        }
+        
+        for p in self.peripherArr {
+            if p.x == point.x && p.y == point.y {
+                return false
+            }
+        }
+        
+        return true
     }
     
     private func getCoordinates(_ point: CGPoint) -> String {
@@ -148,12 +165,58 @@ extension GameController {
         
         let arr = coordinates.components(separatedBy: "-")
         
-        var x = Int(arr.first!)! * 20
-        var y = Int(arr.last!)! * 20
+        let x = Int(arr.first!)! * 20
+        let y = Int(arr.last!)! * 20
     
         piece.center = CGPoint(x: x, y: y)
         
         self.boardView.addSubview(piece)
+        
+        // 添加到对应数组中，判断是否有玩家成功
+        if role == .central {
+            self.centralArr.append(CGPoint(x: Int(arr.first!)!, y: Int(arr.last!)!))
+        } else if role == .peripheral {
+            self.peripherArr.append(CGPoint(x: Int(arr.first!)!, y: Int(arr.last!)!))
+        }
+        
+        if isWin((self.currentRole == .central ? self.centralArr : self.peripherArr)) {
+            if self.currentRole == .central {
+                scaner?.writeValue("Last:\(coordinates)")
+            } else {
+                local?.writeLocalReadableForNotify("Last:\(coordinates)")
+            }
+            self.alertLbl.text = "恭喜你胜利了。"
+        } else {
+            if self.currentRole == .central {
+                self.scaner?.writeValue(coordinates)
+            } else {
+                self.local?.writeLocalReadableForNotify(coordinates)
+            }
+            self.alertLbl.text = "等待对方落子"
+        }
+    }
+    
+    /// 判断当前角色是否成功
+    private func isWin(_ pointArr: [CGPoint]) -> Bool {
+        
+        
+        return false
+    }
+    
+    // transform coordinates to self_coordinates
+    private func transformed(_ value: String) -> String {
+        let total = 16
+        
+        var result = ""
+        
+        let arr = value.components(separatedBy: "-")
+        
+        let x = Int(arr.first!)!
+        let y = Int(arr.last!)!
+        
+        result = "\(total-x)-\(total-y)"
+        
+        return result
     }
 }
 
@@ -191,15 +254,24 @@ extension GameController: BleScanerDelegate {
             self.alertLbl.text = "房主在等我准备"
             self.handleBtn.isEnabled = true
         case START_GAME:
-            self.alertLbl.text = "房主说那我们开始吧，等待房主落子"
+            self.alertLbl.text = "房主说我们开始吧，等待房主落子"
             self.handleBtn.isHidden = true
-        case GAME_OVER:
-            self.alertLbl.text = "游戏结束"
         default:
             // 收到棋子的坐标信息
             print("piece position value: \(value)")
             
-            putPiece(value, role: .peripheral)
+            putPiece(self.transformed(value), role: .peripheral)
+            
+            if value.hasPrefix("Last:") {
+                // 对方落子之后赢得比赛
+                self.alertLbl.text = "对手已经胜利。游戏结束。"
+                
+                // UI 处理
+                
+            } else {
+                self.boardView.isUserInteractionEnabled = true
+                self.alertLbl.text = "己方可以落子"
+            }
         }
     }
 }
@@ -229,9 +301,6 @@ extension GameController: BleLocalPeripherDelegate {
             self.handleBtn.isEnabled = true
         case START_GAME:
             self.alertLbl.text = "自己开始下第一个棋子"
-        // 开始放置自己的棋子
-        case GAME_OVER:
-            self.alertLbl.text = "游戏结束"
         case PLAY_AGAIN:
             self.alertLbl.text = "玩家准备再来一局"
         default:
@@ -239,7 +308,18 @@ extension GameController: BleLocalPeripherDelegate {
             // 收到棋子的坐标信息
             print("piece position value: \(value)")
             
-            putPiece(value, role: .central)
+            putPiece(self.transformed(value), role: .central)
+            
+            if value.hasPrefix("Last:") {
+                // 对方落子之后赢得比赛
+                self.alertLbl.text = "对手已经胜利。游戏结束。"
+                
+                // UI 处理
+                
+            } else {
+                self.boardView.isUserInteractionEnabled = true
+                self.alertLbl.text = "己方可以落子"
+            }
         }
     }
 }

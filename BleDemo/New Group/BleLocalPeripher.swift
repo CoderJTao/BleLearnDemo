@@ -70,9 +70,6 @@ class BleLocalPeripher: NSObject {
         myPeripheral?.add(myService!)
         
         // 广播自己的service
-        /*
-         
-         */
         myPeripheral?.startAdvertising([CBAdvertisementDataServiceUUIDsKey: [myService!.uuid], CBAdvertisementDataLocalNameKey: "我创建了一个房间"])
     }
     
@@ -93,6 +90,8 @@ class BleLocalPeripher: NSObject {
 extension BleLocalPeripher: CBPeripheralManagerDelegate {
     /// 当调用添加服务的方法时，回调
     func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
+        print(#function)
+        
         if error != nil {
             print("Error publishing service: \(error!.localizedDescription)")
         }
@@ -128,6 +127,7 @@ extension BleLocalPeripher: CBPeripheralManagerDelegate {
     /// 当你在本地设备中广播一些数据时
     func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
         print(#function)
+        
         guard let read = myCharacteristic_beRead,
             let write = myCharacteristic_beWrite,
             let peripher = myPeripheral
@@ -159,14 +159,10 @@ extension BleLocalPeripher: CBPeripheralManagerDelegate {
             myPeripheral?.respond(to: request, withResult: CBATTError.Code.success)
             
             //确保读取请求的位置没有超出 Characteristic 的值的边界
-//            if request.offset > value.count {
-//                myPeripheral?.respond(to: request, withResult: CBATTError.Code.invalidOffset)
-//            } else {
-//                let range = Range(NSRange(location: request.offset, length: value.count - request.offset))!
-//                request.value = value.subdata(in: range)
-//
-//                myPeripheral?.respond(to: request, withResult: CBATTError.Code.success)
-//            }
+            if request.offset > value.count {
+                print("qrequest's value outside the bounds of your characteristic’s value")
+                myPeripheral?.respond(to: request, withResult: CBATTError.Code.invalidOffset)
+            }
         }
     }
     
@@ -201,23 +197,27 @@ extension BleLocalPeripher: CBPeripheralManagerDelegate {
             }
             myPeripheral?.updateValue(updateValue, for: characteristic , onSubscribedCentrals: nil)
         case I_AM_READY:
-            print("waiting creater to start game")
+            print("Receive Ready from Central")
             self.status = .isReady
         case START_GAME:
             self.status = .isPlaying
             // 开始放置自己的棋子
-        case GAME_OVER:
-            self.status = .gameOver
         case PLAY_AGAIN:
+            print("Receive Play Again from Central")
             self.status = .isReady
         default:
+            print("Receive piece position from Central")
             // 收到的是棋子坐标的信息
-            print(commingValue)
+            print("piece position value: \(commingValue)")
+            
+            if commingValue.hasPrefix("Last:") {
+                // 对方落子之后赢得比赛
+                print("Receive Game Over from Peripheral")
+                self.status = .gameOver
+            }
         }
         
         self.delegate?.localPeripher(self, didUpdateValue: commingValue)
-        
-//        myCharacteristic_beWrite?.value = request.value
         
         myPeripheral?.respond(to: request, withResult: CBATTError.Code.success)
     }
