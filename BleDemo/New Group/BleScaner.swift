@@ -59,6 +59,8 @@ class BleScaner: NSObject {
             self.status = .beforeReady
         case I_AM_READY:
             self.status = .isReady
+        case PLAY_AGAIN:
+            self.status = .isReady
         default:
             // 棋子的坐标
             print("player put his piece value: \(value)")
@@ -264,7 +266,8 @@ extension BleScaner: CBPeripheralDelegate {
         }
         
         if characteristic.isNotifying {
-            peripheral.readValue(for: characteristic)
+//            peripheral.readValue(for: characteristic)
+            print("characteristic.isNotifying true")
         } else {
             print("characteristic.isNotifying false")
         }

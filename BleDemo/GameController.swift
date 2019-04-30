@@ -20,6 +20,9 @@ class GameController: UIViewController {
     @IBOutlet weak var handleBtn: UIButton!
     @IBOutlet weak var alertLbl: UILabel!
     
+    @IBOutlet weak var endView: UIView!
+    @IBOutlet weak var endImage: UIImageView!
+    
     private lazy var tapGesture: UITapGestureRecognizer = {
         let tap = UITapGestureRecognizer(target: self, action: #selector(boardViewTap(_:)))
         return tap
@@ -76,6 +79,18 @@ class GameController: UIViewController {
         }
     }
     
+    private func gameOver(isReceived: Bool) {
+        self.endView.isHidden = false
+        
+        if isReceived {
+            // 对手胜利
+            self.endImage.image = UIImage(named: "failure")!
+        } else {
+            // 己方胜利
+            self.endImage.image = UIImage(named: "victory")!
+        }
+    }
+    
     @IBAction func readyOrStartClick(_ sender: Any) {
         if self.currentRole == .central {
             self.scaner?.writeValue(I_AM_READY)
@@ -86,6 +101,45 @@ class GameController: UIViewController {
             self.handleBtn.isHidden = true
             self.alertLbl.text = "请开始落子"
             self.boardView.isUserInteractionEnabled = true
+        }
+    }
+    
+    @IBAction func quitClicked(_ sender: Any) {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    @IBAction func playAgainClicked(_ sender: Any) {
+        self.endView.isHidden = true
+        
+        self.centralArr.removeAll()
+        self.peripherArr.removeAll()
+        
+        // 删除现在棋盘上所有的棋子
+        for subView in self.boardView.subviews {
+            subView.removeFromSuperview()
+        }
+        
+        if self.currentRole == .central {
+            //
+            self.scaner?.writeValue(PLAY_AGAIN)
+            self.alertLbl.text = "等待房主开始游戏"
+            self.handleBtn.setTitle("已准备", for: .normal)
+        } else {
+            if let status = self.local?.status {
+                if status == .isReady {
+                    self.handleBtn.isHidden = false
+                    self.alertLbl.text = "玩家准备好再来一局了"
+                    self.boardView.isUserInteractionEnabled = false
+                } else {
+                    self.handleBtn.isHidden = true
+                    self.alertLbl.text = "等待玩家准备"
+                    self.boardView.isUserInteractionEnabled = false
+                }
+            } else {
+                self.handleBtn.isHidden = true
+                self.alertLbl.text = "等待玩家准备"
+                self.boardView.isUserInteractionEnabled = false
+            }
         }
     }
 }
@@ -127,6 +181,8 @@ extension GameController {
                 local?.writeLocalReadableForNotify("Last:\(value)")
             }
             self.alertLbl.text = "恭喜你胜利了。"
+            
+            gameOver(isReceived: false)
         } else {
             if self.currentRole == .central {
                 self.scaner?.writeValue(value)
@@ -253,7 +309,7 @@ extension GameController {
                         temp1 += 1
                     } else { break }
                 }
-                return false
+                return count == 5
             }
             
             // 正斜率方向
@@ -277,8 +333,8 @@ extension GameController {
                 while temp_x1 <= 16 && temp_y1 <= 16 {
                     if pointArr.contains(CGPoint(x: temp_x1, y: temp_y1)) {
                         count += 1
-                        temp_x1 -= 1
-                        temp_y1 -= 1
+                        temp_x1 += 1
+                        temp_y1 += 1
                     } else { break }
                 }
                 
@@ -378,15 +434,20 @@ extension GameController: BleScanerDelegate {
             // 收到棋子的坐标信息
             print("piece position value: \(value)")
             
-            putPiece(self.transformed(value), role: .peripheral)
-            
             if value.hasPrefix("Last:") {
                 // 对方落子之后赢得比赛
                 self.alertLbl.text = "对手已经胜利。游戏结束。"
+                var pass = value
+                pass.replaceSubrange(Range.init(NSRange(location: 0, length: 5), in: pass)!, with: "")
+                putPiece(self.transformed(pass), role: .peripheral)
+                
+                gameOver(isReceived: true)
                 
                 // UI 处理
                 
             } else {
+                putPiece(self.transformed(value), role: .peripheral)
+                
                 self.boardView.isUserInteractionEnabled = true
                 self.alertLbl.text = "己方可以落子"
             }
@@ -420,21 +481,29 @@ extension GameController: BleLocalPeripherDelegate {
         case START_GAME:
             self.alertLbl.text = "自己开始下第一个棋子"
         case PLAY_AGAIN:
-            self.alertLbl.text = "玩家准备再来一局"
+            self.alertLbl.text = "玩家准备再来一局,并且已准备"
+            self.handleBtn.isHidden = false
+            self.handleBtn.isEnabled = true
         default:
             // 收到的是棋子坐标的信息
             // 收到棋子的坐标信息
             print("piece position value: \(value)")
             
-            putPiece(self.transformed(value), role: .central)
-            
             if value.hasPrefix("Last:") {
                 // 对方落子之后赢得比赛
                 self.alertLbl.text = "对手已经胜利。游戏结束。"
                 
+                var pass = value
+                pass.replaceSubrange(Range.init(NSRange(location: 0, length: 5), in: pass)!, with: "")
+                putPiece(self.transformed(pass), role: .central)
+                
+                gameOver(isReceived: true)
+                
                 // UI 处理
                 
             } else {
+                putPiece(self.transformed(value), role: .central)
+                
                 self.boardView.isUserInteractionEnabled = true
                 self.alertLbl.text = "己方可以落子"
             }

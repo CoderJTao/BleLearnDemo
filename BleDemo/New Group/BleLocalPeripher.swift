@@ -187,6 +187,9 @@ extension BleLocalPeripher: CBPeripheralManagerDelegate {
             return
         }
         
+        // 停止广播
+        myPeripheral?.stopAdvertising()
+        
         // 确认写入请求与自己的特征对应时
         switch commingValue {
         case I_AM_COMMING:
@@ -232,6 +235,7 @@ extension BleLocalPeripher: CBPeripheralManagerDelegate {
         /*
          当你调用这个方法给订阅的 Central 发送通知时，你可以通过最后的那个参数来指定要发送的 Central，示例代码中的参数为 nil，表明将会发送通知给所有连接且订阅的 Central，没有订阅的 Central 则会被忽略。
          */
+        
         myPeripheral?.updateValue(updateValue, for: characteristic as! CBMutableCharacteristic, onSubscribedCentrals: nil)
     }
     
